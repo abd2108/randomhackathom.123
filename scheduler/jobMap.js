@@ -33,39 +33,39 @@ async function loadJobsFromDB() {
 //const Job = require('../models/jobModel'); // Assuming the Job model is in this path
 
 async function removeJobFromMap(name, timestamp) {
-    if (!name || !timestamp) {
-      console.error('❌ Name and timestamp are required.');
-      return;
-    }
-  
-    if (jobMap.has(timestamp)) {
-      const jobs = jobMap.get(timestamp);
-  
-      const updatedJobs = jobs.filter(job => job.name !== name);
-  
-      if (updatedJobs.length === 0) {
-        jobMap.delete(timestamp);
-        console.log(`✅ All jobs at timestamp ${timestamp} removed from map.`);
-      } else {
-        jobMap.set(timestamp, updatedJobs);
-        console.log(`✅ Job "${name}" removed from timestamp ${timestamp} in map.`);
-      }
-  
-      // Remove from DB
-      try {
-        const result = await Job.deleteOne({ name, timestamp });
-        if (result.deletedCount > 0) {
-          console.log(`✅ Job "${name}" removed from the database.`);
-        } else {
-          console.warn(`⚠️ No job found in DB with name "${name}" and timestamp ${timestamp}.`);
-        }
-      } catch (err) {
-        console.error(`❌ Error removing job from DB: ${err.message}`);
-      }
-    } else {
-      console.warn(`⚠️ No jobs found at timestamp ${timestamp} in jobMap.`);
-    }
+  if (!name || !timestamp) {
+    console.error('❌ Name and timestamp are required.');
+    return;
   }
+
+  if (jobMap.has(timestamp)) {
+    const jobs = jobMap.get(timestamp);
+    const updatedJobs = jobs.filter(job => job.name !== name);
+
+    if (updatedJobs.length === 0) {
+      jobMap.delete(timestamp);
+      console.log(`✅ All jobs at timestamp ${timestamp} removed from map.`);
+    } else {
+      jobMap.set(timestamp, updatedJobs);
+      console.log(`✅ Job "${name}" removed from timestamp ${timestamp} in map.`);
+    }
+  } else {
+    console.log(`ℹ️ No jobs found at timestamp ${timestamp} in jobMap, proceeding with DB deletion.`);
+  }
+
+  // Remove from DB (already handled in route, but keeping logic clear)
+  try {
+    const result = await Job.deleteOne({ name, timestamp });
+    if (result.deletedCount > 0) {
+      console.log(`✅ Job "${name}" removed from the database.`);
+    } else {
+      console.warn(`⚠️ No job found in DB with name "${name}" and timestamp ${timestamp}.`);
+    }
+  } catch (err) {
+    console.error(`❌ Error removing job from DB: ${err.message}`);
+  }
+}
+
   
 
 
