@@ -91,6 +91,24 @@ app.get('/job-list', async (req, res) => {
   }
 });
 
+// New route for delete all confirmation
+app.get('/delete-all-jobs', (req, res) => {
+  res.render('deleteAllConfirmation', { title: 'Delete All Jobs' });
+});
+
+// New API route to delete all jobs
+app.post('/api/delete-all-jobs', async (req, res) => {
+  try {
+    await Job.deleteMany({}); // Delete all jobs from DB
+    console.log('✅ All jobs deleted, bro!');
+    jobMap.clear(); // Clear in-memory jobMap too
+    res.status(200).send('All jobs deleted');
+  } catch (err) {
+    console.error('❌ Error deleting all jobs:', err);
+    res.status(500).send('Error deleting jobs');
+  }
+});
+
 // API routes
 app.use('/api', jobRoutes);
 
@@ -98,15 +116,9 @@ app.use('/api', jobRoutes);
 connectDB()
   .then(async () => {
     console.log('✅ Connected to MongoDB');
-
-    // Load all future jobs into memory
     await loadJobsFromDB();
-
-    // Start the scheduler loop and worker
     startScheduler();
     startWorker();
-
-    // Start server
     server.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
